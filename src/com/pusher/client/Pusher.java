@@ -387,6 +387,10 @@ public class Pusher {
 	 * @returns true if connected, false if not.
 	 */
 	public boolean isConnectedToChannel(String channelName) {
-		return channelManager.isConnectedToChannel(channelName);
+		if (connection.getState() != ConnectionState.CONNECTED) {
+			return false;
+		} else {
+			return channelManager.isConnectedToChannel(channelName);
+		}
 	}
 }
