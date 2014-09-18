@@ -363,11 +363,10 @@ public class Pusher {
 	 */
 	public void unsubscribe(String channelName) {
 
-		if (connection.getState() != ConnectionState.CONNECTED) {
-			throw new IllegalStateException("Cannot unsubscribe from channel " + channelName + " while not connected");
+		if (connection.getState() == ConnectionState.CONNECTED) {
+			channelManager.unsubscribeFrom(channelName);
 		}
 
-		channelManager.unsubscribeFrom(channelName);
 	}
 
 	/* implementation detail */

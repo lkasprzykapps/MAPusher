@@ -39,9 +39,10 @@ public class ChannelManager implements ConnectionEventListener {
 
 	public void subscribeTo(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
 
-		validateArgumentsAndBindEvents(channel, listener, eventNames);
-		channelNameToChannelMap.put(channel.getName(), channel);
-		sendOrQueueSubscribeMessage(channel);
+		if (validateArgumentsAndBindEvents(channel, listener, eventNames)) {
+			channelNameToChannelMap.put(channel.getName(), channel);
+			sendOrQueueSubscribeMessage(channel);
+		}
 	}
 
 	public void unsubscribeFrom(String channelName) {
@@ -142,20 +143,22 @@ public class ChannelManager implements ConnectionEventListener {
 		}
 	}
 
-	private void validateArgumentsAndBindEvents(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
+	private boolean validateArgumentsAndBindEvents(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
 
 		if (channel == null) {
 			throw new IllegalArgumentException("Cannot subscribe to a null channel");
 		}
 
-		if (channelNameToChannelMap.containsKey(channel.getName())) {
-			throw new IllegalArgumentException("Already subscribed to a channel with name " + channel.getName());
+		if (!channelNameToChannelMap.containsKey(channel.getName())) {
+			for (String eventName : eventNames) {
+				channel.bind(eventName, listener);
+			}
+
+			channel.setEventListener(listener);
+			return true;
+		} else {
+			return false;
 		}
 
-		for (String eventName : eventNames) {
-			channel.bind(eventName, listener);
-		}
-
-		channel.setEventListener(listener);
 	}
 }
